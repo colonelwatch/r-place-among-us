@@ -41,48 +41,44 @@ class StencilMatcher:
 # -1 means we don't care
 # 0 means it shouldn't match with 1,2,3,.. but we don't care about consistency
 # 1,2,3,... means we care about consistency AND no matching
-amongus1 = StencilMatcher([
-    [ 0, 1, 1, 1, 0],
-    [-1, 1, 2, 2, 0],
-    [-1, 1, 1, 1, 0],
-    [-1,-1, 1, 1,-1],
-    [ 0, 1, 0, 1, 0]
-])
-amongus2 = StencilMatcher([
-    [ 0, 1, 1, 1, 0],
-    [ 0, 2, 2, 1,-1],
-    [ 0, 1, 1, 1,-1],
-    [-1, 1, 1,-1,-1],
-    [ 0, 1, 0, 1, 0]
-])
-amongus3 = StencilMatcher([
-    [ 0, 1, 1, 1, 0],
-    [-1, 1, 2, 2, 0],
-    [-1,-1, 1, 1,-1],
-    [ 0, 1, 0, 1, 0]
-])
-amongus4 = StencilMatcher([
-    [ 0, 1, 1, 1, 0],
-    [ 0, 2, 2, 1,-1],
-    [-1, 1, 1,-1,-1],
-    [ 0, 1, 0, 1, 0]
-])
-
+amongi = [
+    StencilMatcher([
+        [ 0, 1, 1, 1, 0],
+        [-1, 1, 2, 2, 0],
+        [-1, 1, 1, 1, 0],
+        [-1,-1, 1, 1,-1],
+        [ 0, 1, 0, 1, 0]
+    ]),
+    StencilMatcher([
+        [ 0, 1, 1, 1, 0],
+        [ 0, 2, 2, 1,-1],
+        [ 0, 1, 1, 1,-1],
+        [-1, 1, 1,-1,-1],
+        [ 0, 1, 0, 1, 0]
+    ]),
+    StencilMatcher([
+        [ 0, 1, 1, 1, 0],
+        [-1, 1, 2, 2, 0],
+        [-1,-1, 1, 1,-1],
+        [ 0, 1, 0, 1, 0]
+    ]),
+    StencilMatcher([
+        [ 0, 1, 1, 1, 0],
+        [ 0, 2, 2, 1,-1],
+        [-1, 1, 1,-1,-1],
+        [ 0, 1, 0, 1, 0]
+    ])
+]
 
 sus = np.zeros_like(x_paletted)
 for i in range(2000):
     for j in range(2000):
-        try: # these should be try-excepted individually
-            x_slice = x_paletted[i:i+amongus1.rows, j:j+amongus1.cols]
-            sus[i, j] = sus[i, j] or amongus1.check(x_slice)
-            x_slice = x_paletted[i:i+amongus2.rows, j:j+amongus2.cols]
-            sus[i, j] = sus[i, j] or amongus2.check(x_slice)
-            x_slice = x_paletted[i:i+amongus3.rows, j:j+amongus3.cols]
-            sus[i, j] = sus[i, j] or amongus3.check(x_slice)
-            x_slice = x_paletted[i:i+amongus4.rows, j:j+amongus4.cols]
-            sus[i, j] = sus[i, j] or amongus4.check(x_slice)
-        except IndexError:
-            continue
+        for amongus in amongi:
+            try: # these should be try-excepted individually
+                x_slice = x_paletted[i:i+amongus.rows, j:j+amongus.cols]
+                sus[i, j] = sus[i, j] or amongus.check(x_slice)
+            except IndexError:
+                continue
 
 i, j = np.where(sus)
 x, y = j+2.5, i+2.5 # maps from ij coords to imshow coords, and centers markers
