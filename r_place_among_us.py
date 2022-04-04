@@ -27,20 +27,20 @@ class StencilMatcher:
         stencil = np.array(stencil)
         self.rows = stencil.shape[0]
         self.cols = stencil.shape[1]
-        # we won't care about pixels marked -1 on the stencil
-        self.where_part0 = np.where(stencil == 0)
-        self.where_part1 = np.where(stencil == 1)
-        self.where_part2 = np.where(stencil == 2)
+        self.n_parts = np.max(stencil)+1
+        self.where = [np.where(stencil == i) for i in range(self.n_parts)]
     def check(self, slice):
-        part0 = slice[self.where_part0]
-        part1 = slice[self.where_part1]
-        if any(part1[0] != part1) or any(part1[0] == part0):
-            return False
-        part2 = slice[self.where_part2]
-        if any(part2[0] != part2) or any(part2[0] == part0) or part1[0] == part2[0]:
-            return False
-        return True # color in part1 and part2 are consistent, and they don't match with part0 or each other
+        parts = [slice[where_i] for where_i in self.where]
+        for i in range(self.n_parts):
+            if any(parts[i][0] != parts[i]) and i != 0: # inconsistency check (0 is exempt)
+                return False
+            if any([parts[i][0] in parts[j] for j in range(i)]): # match check
+                return False
+        return True
 
+# -1 means we don't care
+# 0 means it shouldn't match with 1,2,3,.. but we don't care about consistency
+# 1,2,3,... means we care about consistency AND no matching
 amongus1 = StencilMatcher([
     [ 0, 1, 1, 1, 0],
     [-1, 1, 2, 2, 0],
